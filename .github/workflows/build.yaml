@@ -179,6 +179,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Cleanup disk space
+        run: |
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf "$AGENT_TOOLSDIRECTORY"
+      
       - name: Checkout source
         uses: actions/checkout@v4
         with:
