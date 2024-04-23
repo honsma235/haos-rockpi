@@ -218,6 +218,12 @@ jobs:
           sudo chown -R "${WORKSPACE_OWNER}" /mnt/output
           df -h
           
+      - name: "Restore cache: object files"
+        uses: actions/cache/restore@v4
+        with:
+          path: /mnt/cache/cc
+          key: haos-cc-${{ matrix.board.id }}
+      
       - name: Build
         run: |
           BUILDER_UID="$(id -u)"
