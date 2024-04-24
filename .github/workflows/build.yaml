@@ -253,3 +253,35 @@ jobs:
           name: haos-image
           path: output/images/haos_*
           if-no-files-found: error
+          
+      - name: Print cache stats
+        run: |
+          echo "Cache size: $(du -sh /mnt/cache/cc)"
+          echo "Files total: $(find /mnt/cache/cc -mindepth 1 -type f | wc -l)"
+          echo "Old files to remove: $(find /mnt/cache/cc -mindepth 1 -type f -not -anewer output/Makefile | wc -l)"
+          find /mnt/cache/cc -mindepth 1 -type f -not -anewer output/Makefile -delete
+          echo "Cache size after pruning: $(du -sh /mnt/cache/cc)"
+
+      - name: "Save cache: object files"
+        if: github.ref == 'refs/heads/dev'
+        uses: actions/cache/save@v4
+        with:
+          path: /mnt/cache/cc
+          key: haos-cc-${{ matrix.board.id }}-${{ github.run_id }}
+
+      - name: Generate build summary
+        run: |
+          echo "# ${{ matrix.board.id }} build summary" >> $GITHUB_STEP_SUMMARY
+          echo "## Artifacts" >> $GITHUB_STEP_SUMMARY
+          echo "| File | Size (bytes) | Size (formatted) |" >> $GITHUB_STEP_SUMMARY
+          echo "|:-|:-|:-|" >> $GITHUB_STEP_SUMMARY
+          for f in output/images/haos_*; do
+            echo "| $(basename $f) | $(du -b $f | cut -f1) | $(du -bh $f | cut -f1) |" >> $GITHUB_STEP_SUMMARY
+          done
+          echo "## Partitions" >> $GITHUB_STEP_SUMMARY
+          echo "| File | Size (bytes) | Size (formatted) |" >> $GITHUB_STEP_SUMMARY
+          echo "|:-|:-|:-|" >> $GITHUB_STEP_SUMMARY
+          for f in boot.vfat kernel.img rootfs.squashfs overlay.ext4 data.ext4; do
+            echo "| ${f} | $(du -b output/images/$f | cut -f1) | $(du -bh output/images/$f | cut -f1) |" >> $GITHUB_STEP_SUMMARY
+          done
+
