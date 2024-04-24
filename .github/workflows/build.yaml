@@ -251,5 +251,5 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: haos-image
-          path: output/images/haos_*.img.xz
+          path: output/images/haos_*
           if-no-files-found: error
