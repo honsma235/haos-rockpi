@@ -202,6 +202,12 @@ jobs:
         run: |
           sed -i -E "s/(^VERSION_SUFFIX=\").*(\"$)/\1${VERSION_DEV}\2/" buildroot-external/meta
 
+      - name: Get self-signed certificate from the prepare job
+        if: ${{ needs.prepare.outputs.self_signed_cert == 'true' }}
+        uses: actions/download-artifact@v4
+        with:
+          name: signing-key
+
       - name: Free space on build drive
         run: |
           # Inspired by https://github.com/easimon/maximize-build-space/blob/v7/action.yml
